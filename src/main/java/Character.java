@@ -56,7 +56,4 @@ public class Character {
 	public ArrayList<Character> getTargets(){
 		return this.targets;
 	}
-	public void try(){
-		
-	}
 }
