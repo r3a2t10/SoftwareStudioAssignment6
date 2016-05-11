@@ -19,7 +19,10 @@ public class Network {
 	}
 
 	public void display(){
-		
+		this.parent.background(255);
+		this.parent.stroke(102, 255, 51);
+		this.parent.noFill();
+		this.parent.ellipse(700,350,400,400);
 	}
 	
 }
