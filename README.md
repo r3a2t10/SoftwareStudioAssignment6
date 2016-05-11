@@ -75,7 +75,7 @@
 	外面draw的時候，可以呼叫display，display則可以呼叫各自的method，
 	fill所需要的顏色，與node本身形狀。
 	
-   c.Network
+   d.Network
 
 	我們這次沒有使用太多Network，只有在display中用ellipse畫出大圓。
 	
