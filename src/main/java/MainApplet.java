@@ -32,9 +32,12 @@ public class MainApplet extends PApplet{
 	private int m; //nodes' column
 	private boolean isHolding = false; // if mouse has dragged a character
 	private int nodeOnCircle; // node that are on the circle
+	private int prevNodeOnCircle;
 	private ArrayList<Character> charactersOnCircle;
+	private ArrayList<Character> prevCharactersOnCircle;
 	private Character holdingNode; // character that been dragged by mouse
 	private String epi="STAR WARS 1";
+	private String str = "Press 1~7 to change episode.";
 	
 	private final static int width = 1200, height = 650;
 	
@@ -43,6 +46,7 @@ public class MainApplet extends PApplet{
 		size(width, height);
 		characters = new ArrayList<Character>();
 		charactersOnCircle = new ArrayList<Character>();
+		prevCharactersOnCircle = new ArrayList<Character>();
 		net = new Network(this);
 		smooth();
 		loadData();
@@ -53,7 +57,6 @@ public class MainApplet extends PApplet{
 
 	public void draw() {
 		background(255);
-		net.display();
 		for(Character character: characters){
 			character.display();
 		}
@@ -71,19 +74,34 @@ public class MainApplet extends PApplet{
 		fill(166, 255, 0);
 		rect(1040, 100, 120, 50);  // button "CLEAR"
 		rect(1040, 200, 120, 50);  // button "ADD ALL"
+		rect(1040, 300, 120, 50);  // button "UNCLEAR"
 		fill(255);
 		textSize(20);
 		text("CLEAR", 1070, 130);
 		text("ADD ALL", 1055, 230);
-		//=========================
+		text("UNCLEAR", 1058, 330);
+		
 		//episode text
 		fill(255, 102, 102);
 		textSize(50);
 		text(epi,450, 50);
-		//=========================
-		//draw the connection
-		noFill();
+		textSize(30);
+		text(str,450, 620);
+				
+		//noFill();
 		connect();
+		if(isHolding){
+			holdingNode.showName();
+			holdingNode.radius = 40;
+			holdingNode.x = mouseX;
+			holdingNode.y = mouseY;
+			if(sq(mouseX-700)+sq(mouseY-350)<=40000){
+				strokeWeight(4);
+			} else if(sq(mouseX-700)+sq(mouseY-350)>40000){
+				strokeWeight(1);
+			}
+		}
+		net.display();
 	}
 	public void connect(){
 		//System.out.println(charactersOnCircle);
@@ -92,9 +110,11 @@ public class MainApplet extends PApplet{
 			for(Character character2: charactersOnCircle){
 				for(Character character: character1.targets){
 					if(character.equals(character2)){
+						strokeWeight(character1.targets_value.get(character));
+						noFill();
 						line(character1.x,character1.y,character2.x,character2.y);
 						stroke(126);
-						//strokeWeight(character1.targets_value.get(key));
+						strokeWeight(1);
 					}
 				}
 				//System.out.println("1->2: "+character1+" -> "+character2);
@@ -102,31 +122,31 @@ public class MainApplet extends PApplet{
 		}
 	}
 	public void keyPressed(KeyEvent e){  //changing episodes
-		if(e.getKeyCode() == 49){
+		if(e.getKeyCode() == 49 || e.getKeyCode() == 97){
 			nowfile = file1;
 			epi="STAR WARS 1";
 			setup();
-		} else if(e.getKeyCode() == 50){
+		} else if(e.getKeyCode() == 50 || e.getKeyCode() == 98){
 			nowfile = file2;
 			epi="STAR WARS 2";
 			setup();
-		} else if(e.getKeyCode() == 51){
+		} else if(e.getKeyCode() == 51 || e.getKeyCode() == 99){
 			nowfile = file3;
 			epi="STAR WARS 3";
 			setup();
-		} else if(e.getKeyCode() == 52){
+		} else if(e.getKeyCode() == 52 || e.getKeyCode() == 100){
 			nowfile = file4;
 			epi="STAR WARS 4";
 			setup();
-		} else if(e.getKeyCode() == 53){
+		} else if(e.getKeyCode() == 53 || e.getKeyCode() == 101){
 			nowfile = file5;
 			epi="STAR WARS 5";
 			setup();
-		} else if(e.getKeyCode() == 54){
+		} else if(e.getKeyCode() == 54 || e.getKeyCode() == 102){
 			nowfile = file6;
 			epi="STAR WARS 6";
 			setup();
-		} else if(e.getKeyCode() == 55){
+		} else if(e.getKeyCode() == 55 || e.getKeyCode() == 103){
 			nowfile = file7;
 			epi="STAR WARS 7";
 			setup();
@@ -142,7 +162,7 @@ public class MainApplet extends PApplet{
 				}
 			}
 		}
-		if(isHolding){
+		/*if(isHolding){
 			holdingNode.showName();
 			holdingNode.radius = 40;
 			holdingNode.x = mouseX;
@@ -152,7 +172,7 @@ public class MainApplet extends PApplet{
 			} else if(sq(mouseX-700)+sq(mouseY-350)>40000){
 				strokeWeight(1);
 			}
-		}
+		}*/
 	}
 	public void mouseReleased(){
 		if(isHolding){
@@ -202,17 +222,38 @@ public class MainApplet extends PApplet{
 	}
 	public void mouseClicked(){
 		if (overClear()) {
+			//for the "UNCLEAR" button
+			this.prevCharactersOnCircle.clear();
+			for(Character character: charactersOnCircle){  //to record the previous characters on the circle
+				this.prevCharactersOnCircle.add(character);
+			}
+			prevNodeOnCircle = nodeOnCircle;
+			
 			for(Character character: characters){
 				character.x = character.initX;
 				character.y = character.initY;
 			}
-			this.charactersOnCircle.clear();
-			//clear the charactersOnCircle List
+			this.charactersOnCircle.clear();  //clear the charactersOnCircle List
+			nodeOnCircle = 0;
 		} else if(overAddAll()){
 			int i = 1;
 			nodeOnCircle = nodes.size();
 			this.charactersOnCircle.clear();
 			for(Character character: characters){
+				this.charactersOnCircle.add(character);
+				character.x = 700+200*cos(2*PI*i/nodeOnCircle);
+				character.y = 350+200*sin(2*PI*i/nodeOnCircle);
+				i++;
+			}
+		} else if(overUnclear()){
+			int i = 1;
+			for(Character character: charactersOnCircle){
+				character.x = character.initX;
+				character.y = character.initY;
+			}
+			this.charactersOnCircle.clear();
+			nodeOnCircle = prevNodeOnCircle;
+			for(Character character: prevCharactersOnCircle){
 				this.charactersOnCircle.add(character);
 				character.x = 700+200*cos(2*PI*i/nodeOnCircle);
 				character.y = 350+200*sin(2*PI*i/nodeOnCircle);
@@ -236,6 +277,14 @@ public class MainApplet extends PApplet{
 			  return false;
 		  }
 	}
+	public boolean overUnclear()  {
+		  if (mouseX >= 1040 && mouseX <= 1160 && 
+		      mouseY >= 300 && mouseY <= 350) {
+			  return true;
+		  } else {
+			  return false;
+		  }
+	}
 	private void loadData(){
 		data = loadJSONObject(path+nowfile);
 		nodes = data.getJSONArray("nodes");
@@ -253,7 +302,6 @@ public class MainApplet extends PApplet{
 				m = 0;
 			}
 			this.characters.add(new Character(this, name, colour, x, y));
-			//boolean to consider connect or not
 		}
 		for(int i=0;i<links.size();i++){
 			JSONObject ob = links.getJSONObject(i);
